@@ -13,6 +13,7 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "codigo")
     private Long codigo;
+
     @Column(name = "nome")
     private String nome;
 }
