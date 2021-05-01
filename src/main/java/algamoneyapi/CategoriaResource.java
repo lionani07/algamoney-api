@@ -4,11 +4,8 @@ import algamoneyapi.model.Categoria;
 import algamoneyapi.repository.CategoriaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
@@ -24,14 +21,23 @@ public class CategoriaResource {
         return this.categoriaRepository.findAll();
     }
 
-    public ResponseEntity<Categoria> create(@RequestBody Categoria categoria, UriComponentsBuilder uriComponentsBuilder) {
+    @PostMapping
+    public ResponseEntity<Categoria> create(@RequestBody final Categoria categoria) {
         final var categoriaCreated = this.categoriaRepository.save(categoria);
-        final var location = uriComponentsBuilder
-                .path("/codigo")
+        final var location = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .path("/{codigo}")
                 .buildAndExpand(categoriaCreated.getCodigo())
                 .toUri();
 
         return ResponseEntity.created(location).body(categoriaCreated);
+    }
+
+    @GetMapping("/{codigo}")
+    public ResponseEntity<Categoria> findByCodigo(@PathVariable final Long codigo) {
+        return this.categoriaRepository.findById(codigo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }
