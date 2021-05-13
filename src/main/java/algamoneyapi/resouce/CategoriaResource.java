@@ -1,4 +1,4 @@
-package algamoneyapi;
+package algamoneyapi.resouce;
 
 import algamoneyapi.model.Categoria;
 import algamoneyapi.repository.CategoriaRepository;
