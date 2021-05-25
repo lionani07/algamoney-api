@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -22,7 +23,7 @@ public class CategoriaResource {
     }
 
     @PostMapping
-    public ResponseEntity<Categoria> create(@RequestBody final Categoria categoria) {
+    public ResponseEntity<Categoria> create(@Valid @RequestBody final Categoria categoria) {
         final var categoriaCreated = this.categoriaRepository.save(categoria);
         final var location = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
