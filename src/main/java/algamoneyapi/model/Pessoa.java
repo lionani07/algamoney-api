@@ -15,15 +15,12 @@ public class Pessoa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "codigo")
     private Long codigo;
 
     @NotEmpty
-    @Column(name = "nome")
     private String nome;
 
     @NotNull
-    @Column(name = "ativo")
     private Boolean ativo;
 
     @Embedded

@@ -22,7 +22,7 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        final var message = this.messageSource.getMessage("mensagem.invalida", null, LocaleContextHolder.getLocale());
+        final var message = this.messageSource.getMessage("request.invalida", null, LocaleContextHolder.getLocale());
         final var messageDev = ex.getCause().toString();
         final var error = List.of(ErrorDto.of(null, message, messageDev));
 
