@@ -1,12 +1,14 @@
 package algamoneyapi.resouce;
 
 import algamoneyapi.model.Categoria;
+import algamoneyapi.publisher.ResourceCreatedPublisher;
 import algamoneyapi.repository.CategoriaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -17,21 +19,20 @@ public class CategoriaResource {
 
     private final CategoriaRepository categoriaRepository;
 
+    private final ResourceCreatedPublisher resourceCreatedPublisher;
+
     @GetMapping
     public List<Categoria> findAll() {
         return this.categoriaRepository.findAll();
     }
 
     @PostMapping
-    public ResponseEntity<Categoria> create(@Valid @RequestBody final Categoria categoria) {
+    public ResponseEntity<Categoria> create(@Valid @RequestBody final Categoria categoria, HttpServletResponse response ) {
         final var categoriaCreated = this.categoriaRepository.save(categoria);
-        final var location = ServletUriComponentsBuilder
-                .fromCurrentRequestUri()
-                .path("/{codigo}")
-                .buildAndExpand(categoriaCreated.getCodigo())
-                .toUri();
 
-        return ResponseEntity.created(location).body(categoriaCreated);
+        this.resourceCreatedPublisher.publish(response, categoriaCreated.getCodigo());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaCreated);
     }
 
     @GetMapping("/{codigo}")
