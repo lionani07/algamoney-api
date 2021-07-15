@@ -30,6 +30,11 @@ public class PessoaResource {
         return ResponseEntity.status(HttpStatus.CREATED).body(pessoaCreated);
     }
 
+    @DeleteMapping("/{codigo}")
+    public void delete(@PathVariable final Long codigo) {
+        this.pessoaRepository.deleteById(codigo);
+    }
+
     @GetMapping
     public List<Pessoa> findAll() {
         return this.pessoaRepository.findAll();
