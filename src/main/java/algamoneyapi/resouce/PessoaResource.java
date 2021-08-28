@@ -4,6 +4,7 @@ import algamoneyapi.model.Pessoa;
 import algamoneyapi.publisher.ResourceCreatedPublisher;
 import algamoneyapi.repository.PessoaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +32,34 @@ public class PessoaResource {
     }
 
     @DeleteMapping("/{codigo}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final Long codigo) {
         this.pessoaRepository.deleteById(codigo);
+    }
+
+    @PutMapping("/{codigo}")
+    public ResponseEntity<Pessoa> update(@PathVariable final Long codigo, @RequestBody Pessoa pessoa) {
+        final var pessoaFound = this.pessoaRepository
+                .findById(codigo)
+                .orElseThrow(() -> new EmptyResultDataAccessException(1));
+
+        pessoa.setCodigo(pessoaFound.getCodigo());
+        final var pessoaUpdated = this.pessoaRepository.save(pessoa);
+        return ResponseEntity.ok(pessoaUpdated);
+
+        /*
+            BeanUtils.copyProperties(pessoa, pessoaFound, "codigo");
+            final var pessoaUpdated = this.pessoaRepository.save(pessoaFound);
+            return ResponseEntity.ok(pessoaUpdated);
+        */
+
+    }
+
+    @GetMapping("/{codigo}")
+    public ResponseEntity<Pessoa> find(@PathVariable final Long codigo) {
+        return this.pessoaRepository.findById(codigo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
