@@ -3,8 +3,9 @@ package algamoneyapi.resouce;
 import algamoneyapi.model.Pessoa;
 import algamoneyapi.publisher.ResourceCreatedPublisher;
 import algamoneyapi.repository.PessoaRepository;
+import algamoneyapi.service.PessoaService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,9 @@ import java.util.List;
 @RequestMapping("/pessoas")
 @RequiredArgsConstructor
 public class PessoaResource {
+
+    @Autowired
+    private PessoaService pessoaService;
 
     private final PessoaRepository pessoaRepository;
 
@@ -38,21 +42,15 @@ public class PessoaResource {
     }
 
     @PutMapping("/{codigo}")
-    public ResponseEntity<Pessoa> update(@PathVariable final Long codigo, @RequestBody Pessoa pessoa) {
-        final var pessoaFound = this.pessoaRepository
-                .findById(codigo)
-                .orElseThrow(() -> new EmptyResultDataAccessException(1));
-
-        pessoa.setCodigo(pessoaFound.getCodigo());
-        final var pessoaUpdated = this.pessoaRepository.save(pessoa);
+    public ResponseEntity<Pessoa> update(@PathVariable final Long codigo, @RequestBody @Valid Pessoa pessoa) {
+        final var pessoaUpdated =  this.pessoaService.update(codigo, pessoa);
         return ResponseEntity.ok(pessoaUpdated);
+    }
 
-        /*
-            BeanUtils.copyProperties(pessoa, pessoaFound, "codigo");
-            final var pessoaUpdated = this.pessoaRepository.save(pessoaFound);
-            return ResponseEntity.ok(pessoaUpdated);
-        */
-
+    @PutMapping("/{codigo}/ativo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateAtivo(@PathVariable final Long codigo, @RequestBody final Boolean ativo) {
+        this.pessoaService.updateAtivo(codigo, ativo);
     }
 
     @GetMapping("/{codigo}")
