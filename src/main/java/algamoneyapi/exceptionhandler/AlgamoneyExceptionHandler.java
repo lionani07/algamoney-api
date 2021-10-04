@@ -1,8 +1,10 @@
 package algamoneyapi.exceptionhandler;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,7 +28,7 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         final var message = this.messageSource.getMessage("request.invalida", null, LocaleContextHolder.getLocale());
         final var messageDev = ex.toString();
-        final var error = List.of(ErrorDto.of(null, message, messageDev));
+        final var error = List.of(StandarError.of(message, messageDev));
 
         return handleExceptionInternal(ex, error, headers, HttpStatus.BAD_REQUEST, request);
     }
@@ -36,10 +38,9 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
         final var errors =  ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(fieldError -> ErrorDto.of(
+                .map(fieldError -> FieldMessageError.of(
                         fieldError.getField(),
-                        messageSource.getMessage(fieldError, LocaleContextHolder.getLocale()),
-                        fieldError.toString())
+                        messageSource.getMessage(fieldError, LocaleContextHolder.getLocale()))
                 );
 
         return handleExceptionInternal(ex, errors, headers, HttpStatus.BAD_REQUEST, request);
@@ -48,7 +49,15 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(EmptyResultDataAccessException.class)
     public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request) {
         final var message = this.messageSource.getMessage("resource.not-found", null, LocaleContextHolder.getLocale());
-        final var error = ErrorDto.of(null, message, ex.toString());
+        final var error = StandarError.of(message, ex.toString());
         return handleExceptionInternal(ex, error, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest webRequest) {
+        final var message = this.messageSource.getMessage("resource.operation-nao-permitida", null, LocaleContextHolder.getLocale());
+        final var messageDev = ExceptionUtils.getRootCauseMessage(ex);
+        final var error  = StandarError.of(message, messageDev);
+        return handleExceptionInternal(ex, error, new HttpHeaders(), HttpStatus.BAD_REQUEST, webRequest);
     }
 }

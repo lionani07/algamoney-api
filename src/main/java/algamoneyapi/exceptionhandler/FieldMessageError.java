@@ -7,9 +7,8 @@ import lombok.Getter;
 @Builder
 @Getter
 @AllArgsConstructor(staticName = "of")
-public class ErrorDto {
+public class FieldMessageError {
 
     private final String field;
     private final String message;
-    private final String messageDev;
 }

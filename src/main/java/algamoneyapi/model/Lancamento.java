@@ -1,6 +1,5 @@
 package algamoneyapi.model;
 
-import algamoneyapi.custom_validation.DataVencimentoConstraint;
 import algamoneyapi.model.enums.TipoLancamento;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +39,7 @@ public class Lancamento {
     @Enumerated(EnumType.STRING)
     private TipoLancamento tipo;
 
-    @DataVencimentoConstraint
-    private String dataVencimentoTestContraint;
+//    @DataVencimentoConstraint
+//    private String dataVencimentoTestContraint;
 
 }
