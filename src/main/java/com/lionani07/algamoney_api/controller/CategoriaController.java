@@ -3,9 +3,10 @@ package com.lionani07.algamoney_api.controller;
 import com.lionani07.algamoney_api.model.Categoria;
 import com.lionani07.algamoney_api.repository.CategoriaRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.val;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
@@ -19,5 +20,22 @@ public class CategoriaController {
     @GetMapping
     public List<Categoria> findAll() {
         return this.categoriaRepository.findAll();
+    }
+
+    @PostMapping
+    public ResponseEntity<Categoria> create(@RequestBody Categoria categoria) {
+        val categoriaSaved = this.categoriaRepository.save(categoria);
+
+        val location = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}")
+                .buildAndExpand(categoriaSaved.getCodigo())
+                .toUri();
+
+        return ResponseEntity.created(location).body(categoriaSaved);
+    }
+
+    @GetMapping("/{codigo}")
+    public Categoria findByCodigo(@PathVariable Long codigo) {
+        return this.categoriaRepository.findById(codigo)
+                .orElse(null);
     }
 }
