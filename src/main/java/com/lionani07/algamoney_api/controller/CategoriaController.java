@@ -34,8 +34,11 @@ public class CategoriaController {
     }
 
     @GetMapping("/{codigo}")
-    public Categoria findByCodigo(@PathVariable Long codigo) {
+    public ResponseEntity<Categoria> findByCodigo(@PathVariable Long codigo) {
+
         return this.categoriaRepository.findById(codigo)
-                .orElse(null);
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+
     }
 }
