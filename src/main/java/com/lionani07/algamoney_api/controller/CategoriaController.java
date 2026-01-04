@@ -2,6 +2,7 @@ package com.lionani07.algamoney_api.controller;
 
 import com.lionani07.algamoney_api.model.Categoria;
 import com.lionani07.algamoney_api.repository.CategoriaRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Categoria> create(@RequestBody Categoria categoria) {
+    public ResponseEntity<Categoria> create(@Valid @RequestBody Categoria categoria) {
         val categoriaSaved = this.categoriaRepository.save(categoria);
 
         val location = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}")
