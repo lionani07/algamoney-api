@@ -32,4 +32,11 @@ public class PessoaController {
         val pessoas = this.pessoaRepository.findAll();
         return ResponseEntity.ok(pessoas);
     }
+
+    @GetMapping("/{codigo}")
+    public ResponseEntity<?> findByCodigo(@PathVariable Long codigo) {
+        return this.pessoaRepository.findById(codigo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

@@ -1,6 +1,7 @@
 package com.lionani07.algamoney_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -24,5 +25,6 @@ public class Pessoa {
 
     @Embedded
     @NotNull
+    @Valid
     private Endereco endereco;
 }
