@@ -1,13 +1,16 @@
 package com.lionani07.algamoney_api.controller;
 
+import com.lionani07.algamoney_api.event.ResourceCriadoEvent;
 import com.lionani07.algamoney_api.model.Pessoa;
 import com.lionani07.algamoney_api.repository.PessoaRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.val;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/pessoas")
@@ -16,15 +19,15 @@ public class PessoaController {
 
     private final PessoaRepository pessoaRepository;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     @PostMapping
-    public ResponseEntity<Pessoa> create(@Valid @RequestBody Pessoa pessoa) {
+    public ResponseEntity<Pessoa> create(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
         val pessoaCriada = this.pessoaRepository.save(pessoa);
 
-        val location = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}")
-                .buildAndExpand(pessoa.getCodigo())
-                .toUri();
+        this.eventPublisher.publishEvent(new ResourceCriadoEvent(this, response, pessoaCriada.getCodigo()));
 
-        return ResponseEntity.created(location).body(pessoaCriada);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pessoaCriada);
     }
 
     @GetMapping
