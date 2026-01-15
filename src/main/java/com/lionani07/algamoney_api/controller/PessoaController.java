@@ -42,4 +42,10 @@ public class PessoaController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/{codigo}")
+    public ResponseEntity<Void> delete(@PathVariable Long codigo) {
+        this.pessoaRepository.deleteById(codigo);
+        return ResponseEntity.noContent().build();
+    }
 }
