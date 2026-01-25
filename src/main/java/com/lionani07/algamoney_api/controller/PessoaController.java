@@ -1,12 +1,14 @@
 package com.lionani07.algamoney_api.controller;
 
 import com.lionani07.algamoney_api.event.ResourceCriadoEvent;
+import com.lionani07.algamoney_api.exception.AlgamoneyResourceNotFoundException;
 import com.lionani07.algamoney_api.model.Pessoa;
 import com.lionani07.algamoney_api.repository.PessoaRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.val;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,5 +49,15 @@ public class PessoaController {
     public ResponseEntity<Void> delete(@PathVariable Long codigo) {
         this.pessoaRepository.deleteById(codigo);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{codigo}")
+    public ResponseEntity<Pessoa> update(@PathVariable Long codigo, @RequestBody @Valid Pessoa pessoa) {
+        val pessoaDb = pessoaRepository.findById(codigo)
+                .orElseThrow(() -> new AlgamoneyResourceNotFoundException("Resource not found"));
+
+        BeanUtils.copyProperties(pessoa, pessoaDb, "codigo");
+
+        return ResponseEntity.ok(pessoaRepository.save(pessoaDb));
     }
 }

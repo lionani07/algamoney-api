@@ -1,5 +1,6 @@
 package com.lionani07.algamoney_api.controller;
 
+import com.lionani07.algamoney_api.exception.AlgamoneyResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.val;
@@ -14,8 +15,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +47,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         val erros = getErrros(ex.getBindingResult());
 
         return super.handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(AlgamoneyResourceNotFoundException.class)
+    protected ResponseEntity<Object> handle(AlgamoneyResourceNotFoundException ex, WebRequest request) {
+        val mensageUsuario = "Resource not found";
+        val mensageDev = ex.getMessage();
+
+        val erros = List.of(new Erro(mensageUsuario, mensageDev));
+        return super.handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     private List<Erro> getErrros(BindingResult bindingResult) {
