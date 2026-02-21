@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,10 +50,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AlgamoneyResourceNotFoundException.class)
     protected ResponseEntity<Object> handle(AlgamoneyResourceNotFoundException ex, WebRequest request) {
-        val mensageUsuario = "Resource not found";
-        val mensageDev = ex.getMessage();
+        val mensageUsuario = ex.getMessage();
 
-        val erros = List.of(new Erro(mensageUsuario, mensageDev));
+        val erros = List.of(new Erro(mensageUsuario, mensageUsuario));
         return super.handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 

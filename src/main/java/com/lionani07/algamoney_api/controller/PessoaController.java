@@ -1,9 +1,8 @@
 package com.lionani07.algamoney_api.controller;
 
 import com.lionani07.algamoney_api.event.ResourceCriadoEvent;
-import com.lionani07.algamoney_api.exception.AlgamoneyResourceNotFoundException;
 import com.lionani07.algamoney_api.model.Pessoa;
-import com.lionani07.algamoney_api.repository.PessoaRepository;
+import com.lionani07.algamoney_api.service.PessoaService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -19,13 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class PessoaController {
 
-    private final PessoaRepository pessoaRepository;
+    private final PessoaService pessoaService;
 
     private final ApplicationEventPublisher eventPublisher;
 
     @PostMapping
     public ResponseEntity<Pessoa> create(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
-        val pessoaCriada = this.pessoaRepository.save(pessoa);
+        val pessoaCriada = this.pessoaService.save(pessoa);
 
         this.eventPublisher.publishEvent(new ResourceCriadoEvent(this, response, pessoaCriada.getCodigo()));
 
@@ -34,30 +33,35 @@ public class PessoaController {
 
     @GetMapping
     public ResponseEntity<?> findAll() {
-        val pessoas = this.pessoaRepository.findAll();
+        val pessoas = this.pessoaService.findAll();
         return ResponseEntity.ok(pessoas);
     }
 
     @GetMapping("/{codigo}")
     public ResponseEntity<?> findByCodigo(@PathVariable Long codigo) {
-        return this.pessoaRepository.findById(codigo)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        val pessoa = this.pessoaService.findById(codigo);
+
+        return ResponseEntity.ok(pessoa);
     }
 
     @DeleteMapping("/{codigo}")
     public ResponseEntity<Void> delete(@PathVariable Long codigo) {
-        this.pessoaRepository.deleteById(codigo);
+        this.pessoaService.deleteById(codigo);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{codigo}")
     public ResponseEntity<Pessoa> update(@PathVariable Long codigo, @RequestBody @Valid Pessoa pessoa) {
-        val pessoaDb = pessoaRepository.findById(codigo)
-                .orElseThrow(() -> new AlgamoneyResourceNotFoundException("Resource not found"));
+        val pessoaDb = this.pessoaService.findById(codigo);
 
         BeanUtils.copyProperties(pessoa, pessoaDb, "codigo");
 
-        return ResponseEntity.ok(pessoaRepository.save(pessoaDb));
+        return ResponseEntity.ok(this.pessoaService.save(pessoaDb));
+    }
+
+    @PutMapping("/{codigo}/ativo")
+    public ResponseEntity<Void> updateFieldAtivo(@PathVariable Long codigo, @RequestBody Boolean ativo) {
+        this.pessoaService.updateFieldAtivo(codigo, ativo);
+        return ResponseEntity.noContent().build();
     }
 }
