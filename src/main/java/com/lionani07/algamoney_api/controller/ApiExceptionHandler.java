@@ -53,7 +53,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         val mensageUsuario = ex.getMessage();
 
         val erros = List.of(new Erro(mensageUsuario, mensageUsuario));
-        return super.handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return super.handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
     private List<Erro> getErrros(BindingResult bindingResult) {

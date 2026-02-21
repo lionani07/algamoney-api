@@ -29,7 +29,8 @@ public class PessoaService {
     }
 
     public void deleteById(final Long codigo) {
-        this.pessoaRepository.deleteById(codigo);
+        val pessoa = this.findById(codigo);
+        this.pessoaRepository.delete(pessoa);
     }
 
     public void updateFieldAtivo(final Long codigo, final Boolean ativo) {
