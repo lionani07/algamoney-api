@@ -26,7 +26,8 @@ public class PessoaController {
     public ResponseEntity<Pessoa> create(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
         val pessoaCriada = this.pessoaService.save(pessoa);
 
-        this.eventPublisher.publishEvent(new ResourceCriadoEvent(this, response, pessoaCriada.getCodigo()));
+        ResourceCriadoEvent resourceCriadoEvent = new ResourceCriadoEvent(this, response, pessoaCriada.getCodigo());
+        this.eventPublisher.publishEvent(resourceCriadoEvent);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(pessoaCriada);
     }
