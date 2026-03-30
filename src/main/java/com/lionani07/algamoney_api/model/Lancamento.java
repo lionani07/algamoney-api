@@ -1,12 +1,16 @@
 package com.lionani07.algamoney_api.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "lancamento")
+@Getter
+@Setter
 public class Lancamento {
 
     @Id
@@ -30,6 +34,8 @@ public class Lancamento {
     @ManyToOne(optional = false)
     @JoinColumn(name = "codigo_categoria")
     private Categoria categoria;
-    
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "codigo_pessoa")
     private Pessoa pessoa;
 }
