@@ -25,7 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties = "spring.profiles.active=test")
 @AutoConfigureMockMvc
 @Transactional
-@ActiveProfiles("test")
 @DisplayName("PessoaController Integration Tests")
 public class PessoaControllerTest {
 
