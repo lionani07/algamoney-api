@@ -6,76 +6,70 @@ import lombok.Getter;
 import lombok.val;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 @ControllerAdvice
 @AllArgsConstructor
-public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+public class ApiExceptionHandler {
 
     private final MessageSource messageSource;
 
-    @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-
-        val mensagemUsuario = this.messageSource.getMessage("request.invalida", null, LocaleContextHolder.getLocale());
-        val mensagemDesenvolvedor = ex.getCause().toString();
-
-        val erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
-
-        return super.handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        String userMessage = getMessage("request.invalida");
+        String developerMessage = getRootCause(ex);
+        val erros = List.of(new ApiError(userMessage, developerMessage));
+        return ResponseEntity.badRequest().body(erros);
     }
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        val erros = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(fieldError -> ApiError.of(getMessage(fieldError), fieldError.toString()))
+                .toList();
 
-        val erros = getErrros(ex.getBindingResult());
-
-        return super.handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
+        return ResponseEntity.badRequest().body(erros);
     }
 
     @ExceptionHandler(AlgamoneyResourceNotFoundException.class)
-    protected ResponseEntity<Object> handle(AlgamoneyResourceNotFoundException ex, WebRequest request) {
-        val mensageUsuario = ex.getMessage();
-
-        val erros = List.of(new Erro(mensageUsuario, mensageUsuario));
-        return super.handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    public ResponseEntity<?> handleResourceNotFound(AlgamoneyResourceNotFoundException ex) {
+        val errors =  List.of(new ApiError(ex.getMessage(), ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
     }
 
-    private List<Erro> getErrros(BindingResult bindingResult) {
-        List<Erro> erros = new ArrayList<>();
+    private String getMessage(String code) {
+        Locale locale = LocaleContextHolder.getLocale();
+        return messageSource.getMessage(code, null, locale);
+    }
 
-        for (FieldError fieldError : bindingResult.getFieldErrors()) {
-            val mensagemUsuario = messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
-            val mensagemDesenvolvedor = fieldError.toString();
+    private String getMessage(FieldError fieldError) {
+        Locale locale = LocaleContextHolder.getLocale();
+        return messageSource.getMessage(fieldError, locale);
+    }
 
-            erros.add(new Erro(mensagemUsuario, mensagemDesenvolvedor));
-        }
-
-        return erros;
-
+    private String getRootCause(Exception ex) {
+        Throwable cause = ex.getCause();
+        return cause != null ? cause.toString() : ex.toString();
     }
 
     @AllArgsConstructor
     @Getter
-    public static class Erro {
-        private String mensagemUsuario;
-        private String mensagemDesenvolvedor;
+    public static class ApiError {
+        private final String mensagemUsuario;
+        private final String mensagemDesenvolvedor;
+
+        public static ApiError of(String userMessage, String developerMessage) {
+            return new ApiError(userMessage, developerMessage);
+        }
     }
 }
-
-
