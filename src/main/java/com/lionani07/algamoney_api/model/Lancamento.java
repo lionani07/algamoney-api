@@ -1,6 +1,8 @@
 package com.lionani07.algamoney_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +22,7 @@ public class Lancamento {
     private String descricao;
 
     @Column(name = "data_vencimento")
+    @NotNull
     private LocalDate dataVencimento;
 
     @Column(name = "data_pagamento")
